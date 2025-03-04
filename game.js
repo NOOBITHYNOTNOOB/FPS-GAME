@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const scoreDisplay = document.getElementById('score');
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -13,6 +14,8 @@ let player = {
 };
 
 let bullets = [];
+let targets = [];
+let score = 0;
 
 let keys = {};
 
@@ -34,6 +37,17 @@ canvas.addEventListener('click', (e) => {
     };
     bullets.push(bullet);
 });
+
+function createTarget() {
+    let target = {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: 15,
+        speedX: (Math.random() - 0.5) * 2, // Random horizontal speed
+        speedY: (Math.random() - 0.5) * 2, // Random vertical speed
+    };
+    targets.push(target);
+}
 
 function update() {
     if (keys['w']) {
@@ -59,14 +73,44 @@ function update() {
         player.angle += 0.05;
     }
 
-    bullets.forEach((bullet, index) => {
+    bullets.forEach((bullet, bulletIndex) => {
         bullet.x += Math.cos(bullet.angle) * bullet.speed;
         bullet.y += Math.sin(bullet.angle) * bullet.speed;
 
         if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
-            bullets.splice(index, 1);
+            bullets.splice(bulletIndex, 1);
+        }
+
+        targets.forEach((target, targetIndex) => {
+            const dx = bullet.x - target.x;
+            const dy = bullet.y - target.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < bullet.radius + target.radius) {
+                bullets.splice(bulletIndex, 1);
+                targets.splice(targetIndex, 1);
+                score += 10;
+                scoreDisplay.textContent = `Score: ${score}`;
+            }
+        });
+    });
+
+    targets.forEach((target) => {
+        target.x += target.speedX;
+        target.y += target.speedY;
+
+        // Bounce off walls
+        if (target.x < target.radius || target.x > canvas.width - target.radius) {
+            target.speedX *= -1;
+        }
+        if (target.y < target.radius || target.y > canvas.height - target.radius) {
+            target.speedY *= -1;
         }
     });
+
+    if (Math.random() < 0.01) { // create target randomly
+        createTarget();
+    }
 }
 
 function draw() {
@@ -84,6 +128,15 @@ function draw() {
         ctx.beginPath();
         ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
         ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.closePath();
+    });
+
+    // Targets
+    targets.forEach((target) => {
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'green';
         ctx.fill();
         ctx.closePath();
     });
