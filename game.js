@@ -43,8 +43,8 @@ function createTarget() {
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
         radius: 15,
-        speedX: (Math.random() - 0.5) * 2, // Random horizontal speed
-        speedY: (Math.random() - 0.5) * 2, // Random vertical speed
+        speedX: (Math.random() - 0.5) * 2,
+        speedY: (Math.random() - 0.5) * 2,
     };
     targets.push(target);
 }
@@ -99,7 +99,6 @@ function update() {
         target.x += target.speedX;
         target.y += target.speedY;
 
-        // Bounce off walls
         if (target.x < target.radius || target.x > canvas.width - target.radius) {
             target.speedX *= -1;
         }
@@ -108,7 +107,7 @@ function update() {
         }
     });
 
-    if (Math.random() < 0.01) { // create target randomly
+    if (Math.random() < 0.01) {
         createTarget();
     }
 }
@@ -134,9 +133,17 @@ function draw() {
 
     // Targets
     targets.forEach((target) => {
+        // Blue outer circle
         ctx.beginPath();
         ctx.arc(target.x, target.y, target.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'green';
+        ctx.fillStyle = 'blue';
+        ctx.fill();
+        ctx.closePath();
+
+        // White inner circle
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.radius * 0.5, 0, Math.PI * 2); // Half the radius
+        ctx.fillStyle = 'white';
         ctx.fill();
         ctx.closePath();
     });
